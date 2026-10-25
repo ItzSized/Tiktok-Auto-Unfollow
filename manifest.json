@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "TikTok Auto Unfollow",
+  "version": "1.2.0",
+  "description": "Automatisez le désabonnement sécurisé de vos abonnements TikTok avec délais aléatoires et contrôle en direct.",
+  "author": "Open Source Community",
+  "homepage_url": "https://github.com/ItzSized/Tiktok-Auto-Unfollow",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "TikTok Auto Unfollow"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.tiktok.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.tiktok.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tiktok-auto-unfollow@extension.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}

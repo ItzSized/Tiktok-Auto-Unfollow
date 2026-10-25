@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Auto Unfollow</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- En-tête -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12" stroke="#25F4EE" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M10 8C10 9.66 8.66 11 7 11" stroke="#FE2C55" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="9" cy="8" r="3" fill="#FFFFFF"/>
+            <path d="M4 18C4 15.34 6.24 13.2 9 13.2C10.74 13.2 12.28 14.07 13.2 15.4" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="16" y1="12" x2="22" y2="12" stroke="#FE2C55" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">TikTok Unfollow</h1>
+          <p class="brand-subtitle">Automatisation sécurisée</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Prêt</span>
+      </div>
+    </header>
+
+    <!-- Avertissement si onglet non TikTok -->
+    <div id="warningNotice" class="warning-banner hidden">
+      <span class="warning-icon">⚠️</span>
+      <span id="warningMessage">Rendez-vous sur votre profil TikTok (liste d'abonnements) pour utiliser l'extension.</span>
+    </div>
+
+    <!-- Carte du Compteur -->
+    <section class="counter-card">
+      <div class="counter-label">DÉSABONNEMENTS EFFECTUÉS</div>
+      <div class="counter-display">
+        <span id="unfollowCounter" class="counter-number">0</span>
+        <span class="counter-limit" id="counterLimitText">/ Illimité</span>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar" style="width: 100%;"></div>
+      </div>
+    </section>
+
+    <!-- Boutons d'Action Principaux -->
+    <section class="actions-group">
+      <button id="btnStart" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span>Lancer</span>
+      </button>
+
+      <button id="btnPause" class="btn btn-secondary" disabled>
+        <svg id="pauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+        <span id="pauseText">Pause</span>
+      </button>
+
+      <button id="btnStop" class="btn btn-danger" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+        </svg>
+        <span>Stop</span>
+      </button>
+    </section>
+
+    <!-- Vitesse (applicable en direct) -->
+    <section class="speed-card">
+      <div class="speed-header">
+        <span>Vitesse</span>
+        <span id="speedValue" class="speed-value">2.5 – 5.0 s / compte</span>
+      </div>
+      <div class="speed-presets" id="speedPresets">
+        <button class="speed-chip" data-min="5" data-max="9" title="5 à 9 s par compte">🐢 Lent</button>
+        <button class="speed-chip" data-min="2.5" data-max="5" title="2.5 à 5 s par compte">Normal</button>
+        <button class="speed-chip" data-min="1" data-max="2" title="1 à 2 s par compte">Rapide</button>
+        <button class="speed-chip" data-min="0.5" data-max="1" title="0.5 à 1 s par compte (risqué)">⚡ Turbo</button>
+      </div>
+    </section>
+
+    <!-- Paramètres Anti-Bot & Limites -->
+    <section class="settings-card collapsed">
+      <div class="settings-header" id="settingsToggle">
+        <div class="settings-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Paramètres de sécurité</span>
+        </div>
+        <span class="chevron-icon">▼</span>
+      </div>
+
+      <div class="settings-body" id="settingsBody">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="minDelay">Délai Min (s)</label>
+            <input type="number" id="minDelay" min="0.5" max="30.0" step="0.5" value="2.5">
+          </div>
+          <div class="form-group">
+            <label for="maxDelay">Délai Max (s)</label>
+            <input type="number" id="maxDelay" min="0.5" max="60.0" step="0.5" value="5.0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxLimit">Limite de sécurité</label>
+            <input type="number" id="maxLimit" min="0" max="20000" step="50" value="0">
+            <span class="input-hint">(0 = illimité / désabonner tout)</span>
+          </div>
+          <div class="form-group">
+            <label for="reloadEvery">Recharger la page tous les</label>
+            <input type="number" id="reloadEvery" min="0" max="1000" step="10" value="50">
+            <span class="input-hint">(0 = jamais · reprend tout seul)</span>
+          </div>
+        </div>
+
+        <div class="form-toggle">
+          <label class="switch">
+            <input type="checkbox" id="autoScroll" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="switch-label">Défilement auto de la liste</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Journal d'Activité / Logs -->
+    <section class="logs-card">
+      <div class="logs-header">
+        <span>Journal d'activité</span>
+        <button id="btnClearLogs" class="btn-text">Effacer</button>
+      </div>
+      <div id="logsContainer" class="logs-container">
+        <div class="log-entry system">Prêt à démarrer. Ouvrez la liste de vos abonnements TikTok.</div>
+      </div>
+    </section>
+
+    <!-- Pied de page -->
+    <footer class="app-footer">
+      <button id="btnResetCounter" class="btn-text" title="Remettre le compteur à 0">Réinitialiser compteur</button>
+      <span class="footer-dot">•</span>
+      <a href="https://github.com/ItzSized/Tiktok-Auto-Unfollow" target="_blank" rel="noopener" class="footer-link">GitHub</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
